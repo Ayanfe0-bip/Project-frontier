@@ -1,0 +1,250 @@
+name: Inspect Project Frontier Soldier GLB
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect Soldier Model
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: migration/threejs-foundation
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify asset files
+        run: |
+          set -eu
+
+          test -f assets/character/frontier-soldier.glb
+          test -f assets/weapons/pistol.glb
+          test -f assets/weapons/rifle.glb
+
+          echo "Soldier size: $(wc -c < assets/character/frontier-soldier.glb) bytes"
+          echo "Pistol size: $(wc -c < assets/weapons/pistol.glb) bytes"
+          echo "Rifle size: $(wc -c < assets/weapons/rifle.glb) bytes"
+
+      - name: Install temporary inspection parser
+        run: npm install --no-save --no-package-lock @gltf-transform/core
+
+      - name: Inspect complete GLB
+        run: |
+          cat > /tmp/inspect-glb.mjs <<'EOF'
+          import fs from 'node:fs';
+          import { NodeIO } from '@gltf-transform/core';
+
+          const file = 'assets/character/frontier-soldier.glb';
+          const bytes = fs.readFileSync(file);
+
+          function header() {
+            return {
+              magic: bytes.toString('ascii', 0, 4),
+              version: bytes.readUInt32LE(4),
+              declaredLength: bytes.readUInt32LE(8),
+              actualLength: bytes.length
+            };
+          }
+
+          const h = header();
+          if (h.magic !== 'glTF') {
+            throw new Error(`Invalid GLB magic: ${h.magic}`);
+          }
+          if (h.declaredLength !== h.actualLength) {
+            throw new Error(
+              `GLB length mismatch: header=${h.declaredLength}, actual=${h.actualLength}`
+            );
+          }
+
+          const doc = await new NodeIO().read(file);
+          const root = doc.getRoot();
+
+          const scenes = root.listScenes();
+          const nodes = root.listNodes();
+          const meshes = root.listMeshes();
+          const materials = root.listMaterials();
+          const textures = root.listTextures();
+          const skins = root.listSkins();
+          const animations = root.listAnimations();
+          const accessors = root.listAccessors();
+          const buffers = root.listBuffers();
+
+          const primitiveStats = [];
+          for (const mesh of meshes) {
+            for (const primitive of mesh.listPrimitives()) {
+              const attributes = primitive.listSemantics();
+              primitiveStats.push({
+                mesh: mesh.getName(),
+                mode: primitive.getMode(),
+                vertexCount: primitive.getAttribute('POSITION')?.getCount() ?? 0,
+                indexCount: primitive.getIndices()?.getCount() ?? 0,
+                attributes,
+                hasJoints0: Boolean(primitive.getAttribute('JOINTS_0')),
+                hasWeights0: Boolean(primitive.getAttribute('WEIGHTS_0'))
+              });
+            }
+          }
+
+          const skinStats = skins.map((skin) => ({
+            name: skin.getName(),
+            jointCount: skin.listJoints().length,
+            joints: skin.listJoints().map((node) => node.getName()),
+            hasSkeletonRoot: Boolean(skin.getSkeleton())
+          }));
+
+          const animationStats = animations.map((animation) => {
+            const times = animation.listSamplers()
+              .flatMap((sampler) => sampler.getInput()
+                ? Array.from(sampler.getInput().getArray() ?? [])
+                : []);
+            return {
+              name: animation.getName(),
+              samplerCount: animation.listSamplers().length,
+              channelCount: animation.listChannels().length,
+              durationSeconds: times.length
+                ? Math.max(...times) - Math.min(...times)
+                : 0
+            };
+          });
+
+          const textureStats = textures.map((texture) => ({
+            name: texture.getName(),
+            mimeType: texture.getMimeType(),
+            width: texture.getImage()?.byteLength ? 'embedded image data present' : 'image data unavailable',
+            bytes: texture.getImage()?.byteLength ?? 0,
+            hasImageData: Boolean(texture.getImage())
+          }));
+
+          const accessorStats = accessors.map((a) => ({
+            name: a.getName(),
+            type: a.getType(),
+            componentType: a.getComponentType(),
+            count: a.getCount(),
+            min: a.getMin(),
+            max: a.getMax()
+          }));
+
+          const bounds = [];
+          for (const accessor of accessors) {
+            if (accessor.getType() === 'VEC3' &&
+                accessor.getName() === 'POSITION') {
+              bounds.push({
+                name: accessor.getName(),
+                min: accessor.getMin(),
+                max: accessor.getMax()
+              });
+            }
+          }
+
+          const report = {
+            file,
+            sizeBytes: bytes.length,
+            glbHeader: h,
+            sceneCount: scenes.length,
+            nodeCount: nodes.length,
+            meshCount: meshes.length,
+            primitiveCount: primitiveStats.length,
+            materialCount: materials.length,
+            textureCount: textures.length,
+            skinCount: skins.length,
+            animationCount: animations.length,
+            bufferCount: buffers.length,
+            accessorCount: accessors.length,
+            extensionsUsed: root.listExtensionsUsed().map((e) => e.extensionName),
+            extensionsRequired: root.listExtensionsRequired().map((e) => e.extensionName),
+            scenes: scenes.map((s) => s.getName()),
+            nodes: nodes.map((n) => ({
+              name: n.getName(),
+              hasMesh: Boolean(n.getMesh()),
+              hasSkin: Boolean(n.getSkin()),
+              translation: n.getTranslation(),
+              rotation: n.getRotation(),
+              scale: n.getScale()
+            })),
+            materials: materials.map((m) => ({
+              name: m.getName(),
+              baseColorFactor: m.getBaseColorFactor(),
+              metallicFactor: m.getMetallicFactor(),
+              roughnessFactor: m.getRoughnessFactor(),
+              hasBaseColorTexture: Boolean(m.getBaseColorTexture()),
+              hasNormalTexture: Boolean(m.getNormalTexture()),
+              hasMetallicRoughnessTexture: Boolean(m.getMetallicRoughnessTexture())
+            })),
+            textures: textureStats,
+            skins: skinStats,
+            animations: animationStats,
+            primitives: primitiveStats,
+            positionAccessors: bounds,
+            accessors: accessorStats,
+            warnings: []
+          };
+
+          fs.mkdirSync('inspection-output', { recursive: true });
+          fs.writeFileSync(
+            'inspection-output/soldier-report.json',
+            JSON.stringify(report, null, 2)
+          );
+
+          const summary = [
+            '# Soldier GLB Inspection',
+            '',
+            `- File size: ${bytes.length} bytes`,
+            `- GLB version: ${h.version}`,
+            `- Scenes: ${scenes.length}`,
+            `- Nodes: ${nodes.length}`,
+            `- Meshes: ${meshes.length}`,
+            `- Primitives: ${primitiveStats.length}`,
+            `- Materials: ${materials.length}`,
+            `- Textures: ${textures.length}`,
+            `- Skins: ${skins.length}`,
+            `- Animations: ${animations.length}`,
+            `- Accessors: ${accessors.length}`,
+            '',
+            '## Animation clips',
+            ...(animationStats.length
+              ? animationStats.map((a) =>
+                  `- ${a.name || '(unnamed)'}: ${a.durationSeconds.toFixed(3)} seconds; ${a.channelCount} channels`)
+              : ['- No animation clips found']),
+            '',
+            '## Skinning attributes',
+            ...primitiveStats.map((p) =>
+              `- ${p.mesh || '(unnamed mesh)'}: JOINTS_0=${p.hasJoints0}, WEIGHTS_0=${p.hasWeights0}`),
+            '',
+            '## Skin joints',
+            ...(skinStats.length
+              ? skinStats.map((s) => `- ${s.name || '(unnamed skin)'}: ${s.jointCount} joints`)
+              : ['- No skins found']),
+            '',
+            '## Extensions',
+            `- Used: ${report.extensionsUsed.join(', ') || 'none declared'}`,
+            `- Required: ${report.extensionsRequired.join(', ') || 'none declared'}`,
+            '',
+            'Full geometry and node statistics are in the downloadable JSON artifact.'
+          ].join('\n');
+
+          fs.writeFileSync('inspection-output/summary.md', summary);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+
+          console.log(summary);
+          console.log('\nFull JSON report:\n' + JSON.stringify(report, null, 2));
+          EOF
+
+          node /tmp/inspect-glb.mjs
+
+      - name: Upload inspection report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soldier-glb-inspection
+          path: inspection-output/
+          if-no-files-found: warn
+          retention-days: 7
