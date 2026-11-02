@@ -1,187 +1,65 @@
-extends CanvasLayer
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="mobile_controls_script"]
 
-@onready var ui_root: Control = $UIRoot
-@onready var left_stick_base: Panel = $UIRoot/LeftStickBase
-@onready var left_stick_knob: Panel = $UIRoot/LeftStickBase/Knob
-@onready var right_drag_area: Panel = $UIRoot/RightDragArea
-@onready var jump_button: Button = $UIRoot/JumpButton
-@onready var sprint_button: Button = $UIRoot/SprintButton
-@onready var interact_button: Button = $UIRoot/InteractButton
+[node name="MobileControls" type="CanvasLayer"]
+script = ExtResource("mobile_controls_script")
 
-var left_touch_id: int = -1
-var right_touch_id: int = -1
-var left_center: Vector2
-var left_radius: float = 0.0
-var player_ref: Node3D
-var camera_ref: Node3D
+[node name="UIRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-func _ready() -> void:
-	visible = OS.has_feature("android")
-	if not visible:
-		set_process_unhandled_input(false)
-		return
+[node name="LeftStickBase" type="Panel" parent="UIRoot"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 520.0
+offset_right = 216.0
+offset_bottom = 700.0
 
-	_setup_controls()
-	_assign_refs()
-	_ensure_actions()
+[node name="Knob" type="Panel" parent="UIRoot/LeftStickBase"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 56.0
+offset_right = 118.0
+offset_bottom = 118.0
 
-func _assign_refs() -> void:
-	var root := get_tree().current_scene
-	if root != null:
-		player_ref = root.get_node_or_null("Player")
-		camera_ref = root.get_node_or_null("ThirdPersonCamera")
+[node name="RightDragArea" type="Panel" parent="UIRoot"]
+layout_mode = 0
+offset_left = 908.0
+offset_top = 486.0
+offset_right = 1148.0
+offset_bottom = 726.0
 
-func _ensure_actions() -> void:
-	var actions: Array[String] = ["move_forward", "move_back", "move_left", "move_right", "sprint", "jump", "interact"]
-	for action_name in actions:
-		if not InputMap.has_action(action_name):
-			InputMap.add_action(action_name)
+[node name="JumpButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1048.0
+offset_top = 602.0
+offset_right = 1164.0
+offset_bottom = 718.0
+text = "Jump"
 
-func _setup_controls() -> void:
-	left_stick_base.custom_minimum_size = Vector2(190, 190)
-	left_stick_base.size_flags_horizontal = Control.SIZE_FILL
-	left_stick_base.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	left_stick_base.position = Vector2(55, get_viewport_rect().size.y - 245)
-	left_stick_base.size = Vector2(190, 190)
-	left_radius = 68.0
-	left_center = left_stick_base.position + left_stick_base.size * 0.5
-	left_stick_knob.position = left_stick_base.size * 0.5 - left_stick_knob.size * 0.5
+[node name="SprintButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 864.0
+offset_top = 480.0
+offset_right = 968.0
+offset_bottom = 584.0
+text = "Sprint"
 
-	right_drag_area.position = Vector2(get_viewport_rect().size.x - 280, get_viewport_rect().size.y - 320)
-	right_drag_area.size = Vector2(240, 240)
-	jump_button.position = Vector2(get_viewport_rect().size.x - 170, get_viewport_rect().size.y - 175)
-	sprint_button.position = Vector2(get_viewport_rect().size.x - 290, get_viewport_rect().size.y - 250)
-	interact_button.position = Vector2(get_viewport_rect().size.x - 170, get_viewport_rect().size.y - 300)
+[node name="InteractButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1048.0
+offset_top = 454.0
+offset_right = 1164.0
+offset_bottom = 570.0
+text = "Interact"
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED:
-		_setup_controls()
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
-		return
-
-	if event is InputEventScreenTouch:
-		var touch_event: InputEventScreenTouch = event
-		if touch_event.pressed:
-			if left_touch_id == -1 and touch_event.position.x < get_viewport_rect().size.x * 0.5:
-				left_touch_id = touch_event.index
-				_handle_left_touch(touch_event.position)
-			elif right_touch_id == -1 and touch_event.position.x >= get_viewport_rect().size.x * 0.5:
-				right_touch_id = touch_event.index
-				_handle_right_touch(touch_event.position)
-		else:
-			if touch_event.index == left_touch_id:
-				left_touch_id = -1
-				reset_left_joystick()
-			elif touch_event.index == right_touch_id:
-				right_touch_id = -1
-				camera_ref = null
-
-	if event is InputEventScreenDrag:
-		var drag_event: InputEventScreenDrag = event
-		if drag_event.index == left_touch_id:
-			_handle_left_drag(drag_event.position)
-		elif drag_event.index == right_touch_id:
-			_handle_right_drag(drag_event.relative)
-
-	if event is InputEventScreenTouch and not event.pressed:
-		if jump_button.button_pressed:
-			jump_button.button_pressed = false
-		if sprint_button.button_pressed:
-			sprint_button.button_pressed = false
-		if interact_button.button_pressed:
-			interact_button.button_pressed = false
-
-func _handle_left_touch(position: Vector2) -> void:
-	_handle_left_drag(position)
-
-func _handle_left_drag(position: Vector2) -> void:
-	var local_center := left_stick_base.position + left_stick_base.size * 0.5
-	var delta := position - local_center
-	var clamped_delta := delta.limit_length(left_radius)
-	left_stick_knob.position = left_stick_base.size * 0.5 + clamped_delta - left_stick_knob.size * 0.5
-	var normalized := Vector2(clamped_delta.x / left_radius, -clamped_delta.y / left_radius)
-	if player_ref != null and player_ref.has_method("set_mobile_move_vector"):
-		player_ref.set_mobile_move_vector(normalized)
-
-	if normalized.length() > 0.05:
-		if InputMap.has_action("move_forward"):
-			Input.action_press("move_forward")
-			Input.action_release("move_back")
-			Input.action_release("move_left")
-			Input.action_release("move_right")
-			# action state is updated by the player script using the movement vector directly.
-	else:
-		reset_left_joystick()
-
-func reset_left_joystick() -> void:
-	left_stick_knob.position = left_stick_base.size * 0.5 - left_stick_knob.size * 0.5
-	if player_ref != null and player_ref.has_method("set_mobile_move_vector"):
-		player_ref.set_mobile_move_vector(Vector2.ZERO)
-	for action_name in ["move_forward", "move_back", "move_left", "move_right"]:
-		if InputMap.has_action(action_name):
-			Input.action_release(action_name)
-
-func _handle_right_touch(position: Vector2) -> void:
-	pass
-
-func _handle_right_drag(relative: Vector2) -> void:
-	if camera_ref != null and camera_ref.has_method("apply_rotation_input"):
-		camera_ref.apply_rotation_input(relative)
-
-func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mouse_event: InputEventMouseButton = event
-		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
-			if jump_button.get_global_rect().has_point(mouse_event.position):
-				jump_button.button_pressed = true
-				Input.action_press("jump")
-			elif sprint_button.get_global_rect().has_point(mouse_event.position):
-				sprint_button.button_pressed = true
-				Input.action_press("sprint")
-			elif interact_button.get_global_rect().has_point(mouse_event.position):
-				interact_button.button_pressed = true
-				if InputMap.has_action("interact"):
-					Input.action_press("interact")
-		if event is InputEventMouseButton and not mouse_event.pressed:
-			if jump_button.button_pressed:
-				jump_button.button_pressed = false
-				Input.action_release("jump")
-			if sprint_button.button_pressed:
-				sprint_button.button_pressed = false
-				Input.action_release("sprint")
-			if interact_button.button_pressed:
-				interact_button.button_pressed = false
-				if InputMap.has_action("interact"):
-					Input.action_release("interact")
-
-func _on_jump_pressed() -> void:
-	if InputMap.has_action("jump"):
-		Input.action_press("jump")
-	jump_button.modulate = Color(0.9, 1.0, 0.5, 1.0)
-
-func _on_jump_released() -> void:
-	if InputMap.has_action("jump"):
-		Input.action_release("jump")
-	jump_button.modulate = Color(1.0, 1.0, 1.0, 1.0)
-
-func _on_sprint_pressed() -> void:
-	if InputMap.has_action("sprint"):
-		Input.action_press("sprint")
-	sprint_button.modulate = Color(0.7, 0.95, 1.0, 1.0)
-
-func _on_sprint_released() -> void:
-	if InputMap.has_action("sprint"):
-		Input.action_release("sprint")
-	sprint_button.modulate = Color(1.0, 1.0, 1.0, 1.0)
-
-func _on_interact_pressed() -> void:
-	if InputMap.has_action("interact"):
-		Input.action_press("interact")
-	interact_button.modulate = Color(1.0, 0.8, 0.4, 1.0)
-
-func _on_interact_released() -> void:
-	if InputMap.has_action("interact"):
-		Input.action_release("interact")
-	interact_button.modulate = Color(1.0, 1.0, 1.0, 1.0)
+[connection signal="pressed" from="UIRoot/JumpButton" to="." method="_on_jump_pressed"]
+[connection signal="button_up" from="UIRoot/JumpButton" to="." method="_on_jump_released"]
+[connection signal="pressed" from="UIRoot/SprintButton" to="." method="_on_sprint_pressed"]
+[connection signal="button_up" from="UIRoot/SprintButton" to="." method="_on_sprint_released"]
+[connection signal="pressed" from="UIRoot/InteractButton" to="." method="_on_interact_pressed"]
+[connection signal="button_up" from="UIRoot/InteractButton" to="." method="_on_interact_released"]
