@@ -1,24 +1,19 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=10 format=3]
 
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="player_scene"]
-[ext_resource type="PackedScene" path="res://scenes/camera/third_person_camera.tscn" id="third_person_camera_scene"]
-[ext_resource type="PackedScene" path="res://scenes/ui/mobile_controls.tscn" id="mobile_controls_scene"]
-[ext_resource type="PackedScene" path="res://scenes/ui/player_hud.tscn" id="player_hud_scene"]
+[ext_resource type="Script" path="res://scripts/interactables/health_pickup.gd" id="health_pickup_script"]
+[ext_resource type="Script" path="res://scripts/interactables/test_door.gd" id="test_door_script"]
 
-[sub_resource type="Environment" id="Environment_main"]
-background_mode = 1
-background_color = Color(0.03, 0.05, 0.08, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.75, 0.8, 0.9, 1)
-ambient_light_energy = 1.2
+[sub_resource type="BoxMesh" id="BoxMesh_health_pickup"]
+size = Vector3(0.9, 0.9, 0.9)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_main"]
-size = Vector2(200, 200)
+[sub_resource type="SphereShape3D" id="SphereShape3D_health_pickup"]
+radius = 1.25
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_main"]
-albedo_color = Color(0.12, 0.14, 0.17, 1)
-metallic = 0.0
-roughness = 1.0
+[sub_resource type="BoxMesh" id="BoxMesh_door"]
+size = Vector3(1.4, 2.4, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_door"]
+size = Vector3(1.4, 2.4, 0.2)
 
 [node name="Main" type="Node3D"]
 
@@ -44,3 +39,42 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6)
 [node name="MobileControls" parent="." instance=ExtResource("mobile_controls_scene")]
 
 [node name="PlayerHud" parent="." instance=ExtResource("player_hud_scene")]
+
+[node name="HealthPickup" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0.75, 3.25)
+script = ExtResource("health_pickup_script")
+heal_amount = 30.0
+
+[node name="PickupVisual" type="MeshInstance3D" parent="HealthPickup"]
+mesh = SubResource("BoxMesh_health_pickup")
+
+[node name="InteractionArea" type="Area3D" parent="HealthPickup"]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HealthPickup/InteractionArea"]
+shape = SubResource("SphereShape3D_health_pickup")
+
+[node name="TestDoor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, 0)
+script = ExtResource("test_door_script")
+open_angle_degrees = 90.0
+
+[node name="DoorPivot" type="Node3D" parent="TestDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+
+[node name="DoorVisual" type="MeshInstance3D" parent="TestDoor/DoorPivot"]
+mesh = SubResource("BoxMesh_door")
+
+[node name="InteractionArea" type="Area3D" parent="TestDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestDoor/InteractionArea"]
+shape = SubResource("BoxShape3D_door")
+
+[connection signal="body_entered" from="HealthPickup/InteractionArea" to="HealthPickup" method="_on_interaction_area_body_entered"]
+[connection signal="body_exited" from="HealthPickup/InteractionArea" to="HealthPickup" method="_on_interaction_area_body_exited"]
+[connection signal="body_entered" from="TestDoor/InteractionArea" to="TestDoor" method="_on_interaction_area_body_entered"]
+[connection signal="body_exited" from="TestDoor/InteractionArea" to="TestDoor" method="_on_interaction_area_body_exited"]

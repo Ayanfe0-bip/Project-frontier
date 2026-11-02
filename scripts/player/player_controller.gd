@@ -6,6 +6,8 @@ extends CharacterBody3D
 @export var acceleration: float = 12.0
 @export var deceleration: float = 14.0
 @export var jump_velocity: float = 5.2
+@export var sprint_stamina_cost_per_second: float = 18.0
+@export var sprint_stamina_recovery_per_second: float = 20.0
 
 @export_group("Physics")
 @export var gravity: float = 20.0
@@ -35,6 +37,9 @@ func set_mobile_move_vector(vector: Vector2) -> void:
 	mobile_move_input = vector
 
 func set_mobile_sprint_active(active: bool) -> void:
+	if active and not can_sprint():
+		Input.action_release("sprint")
+		return
 	if active:
 		Input.action_press("sprint")
 	else:
@@ -86,6 +91,11 @@ func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
+func can_sprint() -> bool:
+	if player_stats == null or not player_stats.has_method("can_sprint"):
+		return true
+	return player_stats.can_sprint()
+
 func _handle_movement(delta: float) -> void:
 	var keyboard_move := Vector2(
 		Input.get_axis("move_left", "move_right"),
@@ -96,17 +106,15 @@ func _handle_movement(delta: float) -> void:
 		move_input = mobile_move_input
 
 	var stamina_consumed := false
-	if Input.is_action_pressed("sprint") and move_input.length() > 0.1:
+	var sprint_held := Input.is_action_pressed("sprint") and move_input.length() > 0.1
+	if sprint_held and can_sprint():
 		if player_stats != null and player_stats.has_method("consume_stamina"):
-			stamina_consumed = player_stats.consume_stamina(18.0 * delta)
-		if not stamina_consumed:
-			is_sprinting = false
-		else:
-			is_sprinting = true
+			stamina_consumed = player_stats.consume_stamina(sprint_stamina_cost_per_second * delta)
+		is_sprinting = stamina_consumed
 	else:
 		is_sprinting = false
 		if player_stats != null and player_stats.has_method("recover_stamina"):
-			player_stats.recover_stamina(20.0 * delta)
+			player_stats.recover_stamina(sprint_stamina_recovery_per_second * delta)
 
 	var target_speed: float = sprint_speed if is_sprinting else walk_speed
 	var direction := Vector3.ZERO
