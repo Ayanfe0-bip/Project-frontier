@@ -1,0 +1,108 @@
+:root {
+  color-scheme: dark;
+  --bg-1: #02070d;
+  --bg-2: #0a1523;
+  --panel: rgba(10, 17, 26, 0.78);
+  --panel-border: rgba(116, 153, 202, 0.28);
+  --primary: #8ec5ff;
+  --secondary: #5ed7c1;
+  --text: #edf4ff;
+  --muted: #9eafc8;
+  --loading-fill: linear-gradient(90deg, #8ec5ff 0%, #60d0ff 40%, #7ef3d8 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at top, rgba(37, 59, 88, 0.85), transparent 35%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  color: var(--text);
+  font-family: Inter, 'Segoe UI', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+}
+
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(2, 7, 13, 0.86), rgba(8, 13, 20, 0.96));
+  z-index: 5;
+  transition: opacity 250ms ease, visibility 250ms ease;
+}
+
+.loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-screen__panel {
+  width: min(520px, calc(100vw - 32px));
+  padding: 2rem 1.5rem 1.5rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  background: rgba(11, 17, 25, 0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 80px rgba(2, 6, 12, 0.7);
+}
+
+.loading-screen__eyebrow {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.loading-screen h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  letter-spacing: -0.06em;
+  font-weight: 700;
+}
+
+.loading-screen p {
+  margin: 0.8rem 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.loading-bar {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 50px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.loading-bar__fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--loading-fill);
+  box-shadow: 0 0 24px rgba(126, 243, 216, 0.8);
+  transition: width 240ms ease;
+}
