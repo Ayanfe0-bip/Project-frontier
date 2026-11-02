@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_base.gd" id="weapon_base_script"]
+
+[node name="Pistol" type="Node3D"]
+script = ExtResource("weapon_base_script")
+weapon_name = "Pistol"
+weapon_type = "pistol"
+magazine_size = 12
+reserve_ammo = 48
+fire_rate = 0.18
+reload_time = 1.25
+damage = 22.0
+effective_range = 60.0
+automatic = false
+muzzle_offset = Vector3(0.12, 0.08, 0.0)
+
+[node name="WeaponVisualRoot" type="Node3D" parent="."]
+visible = false

@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_base.gd" id="weapon_base_script"]
+
+[node name="AssaultRifle" type="Node3D"]
+script = ExtResource("weapon_base_script")
+weapon_name = "Assault Rifle"
+weapon_type = "rifle"
+magazine_size = 30
+reserve_ammo = 120
+fire_rate = 0.09
+reload_time = 1.75
+damage = 18.0
+effective_range = 80.0
+automatic = true
+muzzle_offset = Vector3(0.28, 0.09, 0.0)
+
+[node name="WeaponVisualRoot" type="Node3D" parent="."]
+visible = false

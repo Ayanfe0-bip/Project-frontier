@@ -1,4 +1,5 @@
 [gd_scene load_steps=2 format=3]
+
 [ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="mobile_controls_script"]
 
 [node name="MobileControls" type="CanvasLayer"]
@@ -64,9 +65,53 @@ offset_bottom = 570.0
 text = "Interact"
 mouse_filter = 1
 
+[node name="FireButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1005.0
+offset_top = 316.0
+offset_right = 1095.0
+offset_bottom = 406.0
+text = "Fire"
+mouse_filter = 1
+
+[node name="AimButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 884.0
+offset_top = 316.0
+offset_right = 974.0
+offset_bottom = 406.0
+text = "Aim"
+mouse_filter = 1
+
+[node name="ReloadButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1012.0
+offset_top = 222.0
+offset_right = 1102.0
+offset_bottom = 312.0
+text = "Reload"
+mouse_filter = 1
+
+[node name="SwitchButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 884.0
+offset_top = 222.0
+offset_right = 974.0
+offset_bottom = 312.0
+text = "Switch"
+mouse_filter = 1
+
 [connection signal="pressed" from="UIRoot/JumpButton" to="." method="_on_jump_pressed"]
 [connection signal="button_up" from="UIRoot/JumpButton" to="." method="_on_jump_released"]
 [connection signal="pressed" from="UIRoot/SprintButton" to="." method="_on_sprint_pressed"]
 [connection signal="button_up" from="UIRoot/SprintButton" to="." method="_on_sprint_released"]
 [connection signal="pressed" from="UIRoot/InteractButton" to="." method="_on_interact_pressed"]
 [connection signal="button_up" from="UIRoot/InteractButton" to="." method="_on_interact_released"]
+[connection signal="pressed" from="UIRoot/FireButton" to="." method="_on_fire_pressed"]
+[connection signal="button_up" from="UIRoot/FireButton" to="." method="_on_fire_released"]
+[connection signal="pressed" from="UIRoot/AimButton" to="." method="_on_aim_pressed"]
+[connection signal="button_up" from="UIRoot/AimButton" to="." method="_on_aim_released"]
+[connection signal="pressed" from="UIRoot/ReloadButton" to="." method="_on_reload_pressed"]
+[connection signal="button_up" from="UIRoot/ReloadButton" to="." method="_on_reload_released"]
+[connection signal="pressed" from="UIRoot/SwitchButton" to="." method="_on_switch_pressed"]
+[connection signal="button_up" from="UIRoot/SwitchButton" to="." method="_on_switch_released"]
