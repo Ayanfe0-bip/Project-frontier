@@ -89,4 +89,51 @@ Not started yet.
 
 ## Notes
 
-Phase 1, Phase 2, and Phase 3 remain intact and are preserved as the production foundation. Phase 4 adds reusable Android mobile controls while keeping desktop input fully available for development and testing.
+Phase 1, Phase 2, and Phase 3 remain intact and are preserved as the production foundation. Phase 4 adds reusable Android mobile controls while keeping desktop input fully available for development and iteration.
+
+## Three.js/Vite foundation migration (Phase 1)
+
+This repository now includes a separate Three.js + Vite foundation for Project Frontier while preserving the original Godot project and its historical documentation. The Godot directories, scenes, scripts, and gameplay architecture remain intact and are not deleted or replaced.
+
+### Migration scope
+
+- Preserve the existing Godot project exactly as-is.
+- Preserve the weapon models at `assets/weapons/pistol.glb` and `assets/weapons/rifle.glb` without modification.
+- Establish a standalone Vite + Three.js application for future game rendering work.
+- Prepare the project for Android-friendly browser rendering and Vercel hosting.
+
+### New application structure
+
+- `package.json` — Vite and Three.js project metadata
+- `vite.config.js` — local dev server and Vercel-ready build configuration
+- `index.html` — application mount point and loading shell
+- `src/main.js` — application bootstrap
+- `src/style.css` — premium dark UI styling and loading screen
+- `src/core/Game.js` — main scene, camera, lighting, renderer, and animation loop
+- `src/core/AssetLoader.js` — GLTF loading for the preserved firearm assets
+- `public/favicon.svg` — Project Frontier branding asset
+
+### Asset handling
+
+The original Godot project still contains the working weapon GLB files in `assets/weapons/` and those files are left untouched. The Three.js foundation loads the same assets through a GLTFLoader and keeps them modular for future gameplay integration work.
+
+### Local development
+
+```bash
+npm install
+npm run dev
+```
+
+### Production build
+
+```bash
+npm run build
+```
+
+### Vercel deployment
+
+This project is set up as a standard Vite application and is suitable for deployment on Vercel with the default Vite build output. The `base: './'` configuration keeps asset paths stable for static hosting and browser-based deployment.
+
+### Notes for Phase 1
+
+This migration is intentionally limited to foundation work: a responsive full-screen 3D setup, premium loading flow, and modular scene architecture. It does not replace the Godot project or claim gameplay systems beyond the initial render foundation.
