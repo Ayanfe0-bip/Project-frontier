@@ -6,8 +6,6 @@ extends CharacterBody3D
 @export var acceleration: float = 12.0
 @export var deceleration: float = 14.0
 @export var jump_velocity: float = 5.2
-@export var sprint_stamina_cost_per_second: float = 18.0
-@export var sprint_stamina_recovery_per_second: float = 20.0
 
 @export_group("Physics")
 @export var gravity: float = 20.0
@@ -37,9 +35,6 @@ func set_mobile_move_vector(vector: Vector2) -> void:
 	mobile_move_input = vector
 
 func set_mobile_sprint_active(active: bool) -> void:
-	if active and not can_sprint():
-		Input.action_release("sprint")
-		return
 	if active:
 		Input.action_press("sprint")
 	else:
@@ -60,12 +55,15 @@ func _configure_input_actions() -> void:
 		"sprint",
 		"jump",
 		"interact",
+		"fire",
+		"aim",
+		"reload",
+		"weapon_next",
+		"weapon_prev",
 	]
-
 	for action_name in action_names:
 		if not InputMap.has_action(action_name):
 			InputMap.add_action(action_name)
-
 	_add_key_if_missing("move_forward", KEY_W)
 	_add_key_if_missing("move_forward", KEY_UP)
 	_add_key_if_missing("move_back", KEY_S)
@@ -77,12 +75,16 @@ func _configure_input_actions() -> void:
 	_add_key_if_missing("sprint", KEY_SHIFT)
 	_add_key_if_missing("jump", KEY_SPACE)
 	_add_key_if_missing("interact", KEY_E)
+	_add_key_if_missing("fire", KEY_F)
+	_add_key_if_missing("aim", KEY_MOUSE_BUTTON_RIGHT)
+	_add_key_if_missing("reload", KEY_R)
+	_add_key_if_missing("weapon_next", KEY_1)
+	_add_key_if_missing("weapon_prev", KEY_2)
 
 func _add_key_if_missing(action_name: String, keycode: Key) -> void:
 	for existing_event in InputMap.action_get_events(action_name):
 		if existing_event is InputEventKey and existing_event.keycode == keycode:
 			return
-
 	var key_event := InputEventKey.new()
 	key_event.keycode = keycode
 	InputMap.action_add_event(action_name, key_event)
@@ -90,11 +92,6 @@ func _add_key_if_missing(action_name: String, keycode: Key) -> void:
 func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-
-func can_sprint() -> bool:
-	if player_stats == null or not player_stats.has_method("can_sprint"):
-		return true
-	return player_stats.can_sprint()
 
 func _handle_movement(delta: float) -> void:
 	var keyboard_move := Vector2(
@@ -104,52 +101,38 @@ func _handle_movement(delta: float) -> void:
 	move_input = keyboard_move
 	if mobile_move_input.length() > 0.05:
 		move_input = mobile_move_input
-
-	var stamina_consumed := false
 	var sprint_held := Input.is_action_pressed("sprint") and move_input.length() > 0.1
-	if sprint_held and can_sprint():
-		if player_stats != null and player_stats.has_method("consume_stamina"):
-			stamina_consumed = player_stats.consume_stamina(sprint_stamina_cost_per_second * delta)
-		is_sprinting = stamina_consumed
+	if sprint_held and player_stats != null and player_stats.has_method("can_sprint") and player_stats.can_sprint():
+		if player_stats.has_method("consume_stamina"):
+			player_stats.consume_stamina(18.0 * delta)
+		is_sprinting = true
 	else:
 		is_sprinting = false
 		if player_stats != null and player_stats.has_method("recover_stamina"):
-			player_stats.recover_stamina(sprint_stamina_recovery_per_second * delta)
-
+			player_stats.recover_stamina(20.0 * delta)
 	var target_speed: float = sprint_speed if is_sprinting else walk_speed
 	var direction := Vector3.ZERO
 	if move_input.length() > 0.05:
 		direction.x = move_input.x
 		direction.z = move_input.y
 		direction = direction.normalized()
-
 		var desired_velocity := Vector3(direction.x * target_speed, velocity.y, direction.z * target_speed)
 		var current_horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
-
 		if current_horizontal_velocity.length() > 0.01:
-			current_horizontal_velocity = current_horizontal_velocity.lerp(
-				desired_velocity,
-				min(1.0, acceleration * delta)
-			)
+			current_horizontal_velocity = current_horizontal_velocity.lerp(desired_velocity, min(1.0, acceleration * delta))
 		else:
 			current_horizontal_velocity = desired_velocity
-
 		velocity.x = current_horizontal_velocity.x
 		velocity.z = current_horizontal_velocity.z
 		rotation.y = atan2(direction.x, direction.z)
 	else:
 		var current_horizontal_velocity := Vector3(velocity.x, 0.0, velocity.z)
 		var target_horizontal_velocity := Vector3.ZERO
-		current_horizontal_velocity = current_horizontal_velocity.lerp(
-			target_horizontal_velocity,
-			min(1.0, deceleration * delta)
-		)
+		current_horizontal_velocity = current_horizontal_velocity.lerp(target_horizontal_velocity, min(1.0, deceleration * delta))
 		velocity.x = current_horizontal_velocity.x
 		velocity.z = current_horizontal_velocity.z
-
 	if is_on_floor() and Input.is_action_just_pressed("jump"):
 		velocity.y = jump_velocity
-
 	if is_on_floor() and velocity.y < 0.0:
 		velocity.y = -0.1
 
