@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="player_scene"]
 [ext_resource type="PackedScene" path="res://scenes/camera/third_person_camera.tscn" id="third_person_camera_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mobile_controls.tscn" id="mobile_controls_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -38,3 +39,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, 0)
 [node name="ThirdPersonCamera" parent="." instance=ExtResource("third_person_camera_scene")]
 target_path = NodePath("../Player")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 6)
+
+[node name="MobileControls" parent="." instance=ExtResource("mobile_controls_scene")]

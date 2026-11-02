@@ -41,11 +41,22 @@ Implemented in this stage:
 - Desktop mouse-based rotation setup
 - Reusable camera rig ready for future Android drag control integration
 
-### Phase 4: AI, enemies, and polish
-Planned work:
+### Phase 4: Android mobile controls
+Implemented in this stage:
+- Left-side virtual movement joystick
+- Right-side camera drag area for orbiting the camera
+- Jump and sprint touch buttons
+- Interact button placeholder for future gameplay systems
+- Responsive UI layout for multiple Android screen sizes and aspect ratios
+- Multitouch-friendly control handling with clear visual feedback
+- Preservation of keyboard and mouse input on desktop
+
+### Phase 5: Planned future work
+Not started yet.
 - Enemy behaviors and combat AI
 - World events and dynamic encounters
 - Visual polish, effects, and performance tuning
+- Additional mission and city systems
 - Android optimization and hardware validation
 
 ## Repository structure
@@ -54,8 +65,10 @@ Planned work:
 - `scenes/` — all gameplay and environment scenes
 - `scenes/player/` — reusable player scene and character hierarchy
 - `scenes/camera/` — reusable third-person camera scene
+- `scenes/ui/` — mobile control interface scenes
 - `scripts/player/` — player controller logic
 - `scripts/camera/` — camera scripting and look behavior
+- `scripts/ui/` — mobile control input and UI logic
 - `camera/` — camera systems and rig resources
 - `city/` — city world content, props, and districts
 - `vehicles/` — vehicle systems and assets
@@ -76,4 +89,4 @@ Planned work:
 
 ## Notes
 
-Phase 1 and Phase 2 remain intact and are preserved as the production foundation. Phase 3 introduces a reusable third-person camera that follows the player smoothly while respecting collision and avoiding flips or clipping through world geometry.
+Phase 1, Phase 2, and Phase 3 remain intact and are preserved as the production foundation. Phase 4 adds reusable Android mobile controls while keeping desktop input fully available for development and testing.

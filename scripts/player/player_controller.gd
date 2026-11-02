@@ -12,17 +12,30 @@ extends CharacterBody3D
 
 var move_input: Vector2 = Vector2.ZERO
 var is_sprinting: bool = false
-
+var mobile_move_input: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	_configure_input_actions()
-
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
 	_handle_movement(delta)
 	move_and_slide()
 
+func set_mobile_move_vector(vector: Vector2) -> void:
+	mobile_move_input = vector
+
+func set_mobile_sprint_active(active: bool) -> void:
+	if active:
+		Input.action_press("sprint")
+	else:
+		Input.action_release("sprint")
+
+func set_mobile_jump_active(active: bool) -> void:
+	if active:
+		Input.action_press("jump")
+	else:
+		Input.action_release("jump")
 
 func _configure_input_actions() -> void:
 	var action_names: Array[String] = [
@@ -32,6 +45,7 @@ func _configure_input_actions() -> void:
 		"move_right",
 		"sprint",
 		"jump",
+		"interact",
 	]
 
 	for action_name in action_names:
@@ -48,7 +62,7 @@ func _configure_input_actions() -> void:
 	_add_key_if_missing("move_right", KEY_RIGHT)
 	_add_key_if_missing("sprint", KEY_SHIFT)
 	_add_key_if_missing("jump", KEY_SPACE)
-
+	_add_key_if_missing("interact", KEY_E)
 
 func _add_key_if_missing(action_name: String, keycode: Key) -> void:
 	for existing_event in InputMap.action_get_events(action_name):
@@ -59,17 +73,18 @@ func _add_key_if_missing(action_name: String, keycode: Key) -> void:
 	key_event.keycode = keycode
 	InputMap.action_add_event(action_name, key_event)
 
-
 func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-
 func _handle_movement(delta: float) -> void:
-	move_input = Vector2(
+	var keyboard_move := Vector2(
 		Input.get_axis("move_left", "move_right"),
 		Input.get_axis("move_back", "move_forward")
 	)
+	move_input = keyboard_move
+	if mobile_move_input.length() > 0.05:
+		move_input = mobile_move_input
 
 	is_sprinting = Input.is_action_pressed("sprint") and move_input.length() > 0.1
 	var target_speed: float = sprint_speed if is_sprinting else walk_speed

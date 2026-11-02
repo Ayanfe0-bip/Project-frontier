@@ -17,7 +17,6 @@ var current_yaw: float = 0.0
 var current_pitch: float = -0.15
 var look_active: bool = false
 
-
 func _ready() -> void:
 	if target_path != NodePath():
 		target = get_node(target_path)
@@ -33,11 +32,9 @@ func _ready() -> void:
 	camera.current = true
 	_input_ready()
 
-
 func _input_ready() -> void:
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -53,11 +50,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion and look_active:
 		var mouse_movement := event as InputEventMouseMotion
-		current_yaw -= mouse_movement.relative.x * mouse_sensitivity.x
-		current_pitch -= mouse_movement.relative.y * mouse_sensitivity.y
-		current_pitch = clamp(current_pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
+		apply_rotation_input(mouse_movement.relative)
 		get_viewport().set_input_as_handled()
 
+func apply_rotation_input(delta: Vector2) -> void:
+	current_yaw -= delta.x * mouse_sensitivity.x
+	current_pitch -= delta.y * mouse_sensitivity.y
+	current_pitch = clamp(current_pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 
 func _process(delta: float) -> void:
 	if target == null:
@@ -71,7 +70,6 @@ func _process(delta: float) -> void:
 	)
 	var desired_position := target_origin + desired_offset
 
-	var from_target := desired_position - target_origin
 	wall_check.global_position = target_origin
 	wall_check.target_position = to_local(desired_position)
 	wall_check.force_raycast_update()
@@ -80,12 +78,11 @@ func _process(delta: float) -> void:
 		var hit_point := wall_check.get_collision_point()
 		var hit_normal := wall_check.get_collision_normal()
 		desired_position = hit_point + hit_normal * collision_push
-	
+
 	var blend_factor := 1.0 - exp(-delta * smoothing)
 	global_position = global_position.lerp(desired_position, blend_factor)
 	look_at(target_origin, Vector3.UP)
 	camera.global_transform = global_transform
-
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
