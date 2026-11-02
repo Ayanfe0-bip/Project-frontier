@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.03, 0.05, 0.08, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.75, 0.8, 0.9, 1)
+ambient_light_energy = 1.2
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_main"]
+size = Vector2(200, 200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_main"]
+albedo_color = Color(0.12, 0.14, 0.17, 1)
+metallic = 0.0
+roughness = 1.0
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.5, 0, 0.5, 0.866025, 0, 0, 0, 1, 0, 4, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_main")
+surface_material_override/0 = SubResource("StandardMaterial3D_main")
+
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 8)
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+current = true
+fov = 70.0
