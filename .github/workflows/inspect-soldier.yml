@@ -39,7 +39,7 @@ jobs:
 
       - name: Inspect complete GLB
         run: |
-          cat > /tmp/inspect-glb.mjs <<'EOF'
+          cat > inspect-glb.mjs <<'EOF'
           import fs from 'node:fs';
           import { NodeIO } from '@gltf-transform/core';
 
@@ -238,7 +238,7 @@ jobs:
           console.log('\nFull JSON report:\n' + JSON.stringify(report, null, 2));
           EOF
 
-          node /tmp/inspect-glb.mjs
+          node inspect-glb.mjs
 
       - name: Upload inspection report
         if: always()
