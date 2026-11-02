@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/city/city_generator.gd" id="city_generator_script"]
+
+[node name="ModernCity" type="Node3D"]
+script = ExtResource("city_generator_script")

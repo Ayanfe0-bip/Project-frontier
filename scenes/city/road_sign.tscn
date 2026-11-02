@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="BoxMesh" id="BoxMesh_sign_post"]
+size = Vector3(0.2, 2.4, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sign_panel"]
+size = Vector3(1.0, 0.7, 0.15)
+
+[node name="RoadSign" type="Node3D"]
+
+[node name="Post" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("BoxMesh_sign_post")
+
+[node name="Panel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 2.2, 0)
+mesh = SubResource("BoxMesh_sign_panel")
