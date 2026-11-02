@@ -31,12 +31,15 @@ Implemented in this stage:
 - Reusable animation-ready character hierarchy for future humanoid model integration
 - Temporary visual prototype designed to be replaced with final art without changing the gameplay architecture
 
-### Phase 3: World and progression
-Planned work:
-- City districts and navigation surfaces
-- Mission flow and objective system
-- Progression, rewards, and encounter pacing
-- Vehicle integration and traversal variations
+### Phase 3: Third-person camera system
+Implemented in this stage:
+- Smooth follow camera for the player
+- Third-person behind-character perspective
+- Horizontal and vertical camera rotation
+- Follow distance and camera height tuning
+- Camera smoothing and wall collision avoidance
+- Desktop mouse-based rotation setup
+- Reusable camera rig ready for future Android drag control integration
 
 ### Phase 4: AI, enemies, and polish
 Planned work:
@@ -50,7 +53,9 @@ Planned work:
 - `project.godot` — engine project configuration and startup entry
 - `scenes/` — all gameplay and environment scenes
 - `scenes/player/` — reusable player scene and character hierarchy
+- `scenes/camera/` — reusable third-person camera scene
 - `scripts/player/` — player controller logic
+- `scripts/camera/` — camera scripting and look behavior
 - `camera/` — camera systems and rig resources
 - `city/` — city world content, props, and districts
 - `vehicles/` — vehicle systems and assets
@@ -71,4 +76,4 @@ Planned work:
 
 ## Notes
 
-Phase 1 remains intact and is preserved as the production foundation. Phase 2 introduces a reusable CharacterBody3D player controller and temporary humanoid prototype so the game can progress toward a proper third-person action loop without requiring a finalized model asset.
+Phase 1 and Phase 2 remain intact and are preserved as the production foundation. Phase 3 introduces a reusable third-person camera that follows the player smoothly while respecting collision and avoiding flips or clipping through world geometry.
