@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/ui/mobile_controls.gd" id="mobile_controls_script"]
+
+[node name="MobileControls" type="CanvasLayer"]
+script = ExtResource("mobile_controls_script")
+
+[node name="UIRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LeftStickBase" type="Panel" parent="UIRoot"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 520.0
+offset_right = 216.0
+offset_bottom = 700.0
+
+[node name="Knob" type="Panel" parent="UIRoot/LeftStickBase"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 56.0
+offset_right = 118.0
+offset_bottom = 118.0
+
+[node name="RightDragArea" type="Panel" parent="UIRoot"]
+layout_mode = 0
+offset_left = 908.0
+offset_top = 486.0
+offset_right = 1148.0
+offset_bottom = 726.0
+
+[node name="JumpButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1048.0
+offset_top = 602.0
+offset_right = 1164.0
+offset_bottom = 718.0
+text = "Jump"
+
+[node name="SprintButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 864.0
+offset_top = 480.0
+offset_right = 968.0
+offset_bottom = 584.0
+text = "Sprint"
+
+[node name="InteractButton" type="Button" parent="UIRoot"]
+layout_mode = 0
+offset_left = 1048.0
+offset_top = 454.0
+offset_right = 1164.0
+offset_bottom = 570.0
+text = "Interact"
+
+[connection signal="pressed" from="UIRoot/JumpButton" to="." method="_on_jump_pressed"]
+[connection signal="button_up" from="UIRoot/JumpButton" to="." method="_on_jump_released"]
+[connection signal="pressed" from="UIRoot/SprintButton" to="." method="_on_sprint_pressed"]
+[connection signal="button_up" from="UIRoot/SprintButton" to="." method="_on_sprint_released"]
+[connection signal="pressed" from="UIRoot/InteractButton" to="." method="_on_interact_pressed"]
+[connection signal="button_up" from="UIRoot/InteractButton" to="." method="_on_interact_released"]
