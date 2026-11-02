@@ -25,11 +25,11 @@ Completed in this stage:
 
 ### Phase 2: Player system and locomotion
 Implemented in this stage:
-- CharacterBody3D player controller with movement, acceleration, and sprint logic
-- Ground detection, gravity, and jump behavior
+- CharacterBody3D player controller with movement, acceleration, sprinting, and jump logic
+- Ground detection, gravity, and stable locomotion tuning
 - Keyboard input mappings for developer testing
-- Temporary humanoid visual prototype ready for later art replacement
-- Reusable player scene for future gameplay integration
+- Reusable animation-ready character hierarchy for future humanoid model integration
+- Temporary visual prototype designed to be replaced with final art without changing the gameplay architecture
 
 ### Phase 3: World and progression
 Planned work:
@@ -49,7 +49,8 @@ Planned work:
 
 - `project.godot` — engine project configuration and startup entry
 - `scenes/` — all gameplay and environment scenes
-- `player/` — player-related assets and scripts
+- `scenes/player/` — reusable player scene and character hierarchy
+- `scripts/player/` — player controller logic
 - `camera/` — camera systems and rig resources
 - `city/` — city world content, props, and districts
 - `vehicles/` — vehicle systems and assets
@@ -70,4 +71,4 @@ Planned work:
 
 ## Notes
 
-Phase 1 remains intact and is preserved as the project foundation. Phase 2 adds a reusable player character controlled by a dedicated CharacterBody3D script and a temporary humanoid prototype to support rapid iteration before final art is integrated.
+Phase 1 remains intact and is preserved as the production foundation. Phase 2 introduces a reusable CharacterBody3D player controller and temporary humanoid prototype so the game can progress toward a proper third-person action loop without requiring a finalized model asset.
