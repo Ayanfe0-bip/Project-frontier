@@ -23,12 +23,13 @@ Completed in this stage:
 - Base scene for the opening playable environment
 - Documentation and project organization baseline
 
-### Phase 2: Core gameplay loop
-Planned work:
-- Player controller and movement logic
-- Camera rig and third-person behavior
-- Combat, locomotion, and action feedback
-- Input tuning for mobile and controller support
+### Phase 2: Player system and locomotion
+Implemented in this stage:
+- CharacterBody3D player controller with movement, acceleration, and sprint logic
+- Ground detection, gravity, and jump behavior
+- Keyboard input mappings for developer testing
+- Temporary humanoid visual prototype ready for later art replacement
+- Reusable player scene for future gameplay integration
 
 ### Phase 3: World and progression
 Planned work:
@@ -69,4 +70,4 @@ Planned work:
 
 ## Notes
 
-This repository intentionally starts with a clean structure and a basic playable scene shell only. Future phases will add functional gameplay systems incrementally and maintain a professional production-ready architecture.
+Phase 1 remains intact and is preserved as the project foundation. Phase 2 adds a reusable player character controlled by a dedicated CharacterBody3D script and a temporary humanoid prototype to support rapid iteration before final art is integrated.
