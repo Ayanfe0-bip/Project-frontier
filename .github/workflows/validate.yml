@@ -1,5 +1,5 @@
 name: Validate Project Frontier Phase 1  
-  
+
 on:  
   push:  
     branches:  
@@ -7,28 +7,27 @@ on:
   pull_request:  
     branches:  
       - main  
-  
+
 jobs:  
   build:  
     runs-on: ubuntu-latest  
-  
+
     steps:  
       - name: Check out repository  
         uses: actions/checkout@v4  
-  
+
       - name: Set up Node.js LTS  
         uses: actions/setup-node@v4  
         with:  
-          node-version: 'lts/*'  
-          cache: 'npm'  
-  
+          node-version: '22'  
+
       - name: Install dependencies  
         run: npm install  
-  
+
       - name: Build application  
         id: build  
         run: npm run build  
-  
+
       - name: Upload build artifact  
         if: success()  
         uses: actions/upload-artifact@v4  
@@ -36,11 +35,11 @@ jobs:
           name: project-frontier-dist  
           path: dist  
           if-no-files-found: error  
-  
+
       - name: Build result summary  
         if: success()  
         run: echo "✅ Build succeeded. Artifacts uploaded from dist/."  
-  
+
       - name: Build failure summary  
         if: failure()  
         run: echo "❌ Build failed. Check the logs above for the exact error."  
